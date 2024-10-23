@@ -1,0 +1,15 @@
+server:
+  port: 8999
+
+spring:
+  application:
+    name: user-service
+    activate:
+      on-profile: local
+  config:
+    import: optional:configserver:http://localhost:30001
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:30000/eureka
