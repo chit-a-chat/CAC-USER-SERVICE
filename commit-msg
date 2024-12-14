@@ -8,7 +8,7 @@ commit_lines=$(grep -v "^#" "$commit_msg_file")
 # 첫 번째 줄은 type과 subject
 type_subject=$(echo "$commit_lines" | sed -n '1p')
 
-# 두 번째 줄은 빈 줄이어야 함
+# 두 번째 줄은 반드시 빈 줄이어야 함
 empty_line=$(echo "$commit_lines" | sed -n '2p')
 
 # 세 번째 줄부터 본문과 꼬릿말 구분
@@ -32,10 +32,10 @@ echo "Empty line: '$empty_line'"
 echo "Body: '$body'"
 echo "Footer: '$footer'"
 
-# type 확인 (feat, fix, docs, style, refactor, test, chore 등)
+# type 확인 ([type] 형식, 예: [feat], [fix], 등)
 valid_types="feat|fix|docs|style|refactor|test|chore|design|comment|init|rename|remove"
-if ! echo "$type_subject" | grep -Eq "^($valid_types): .+"; then
-  echo "Error: Commit message 'type' must be one of $valid_types and follow the format 'type: subject'"
+if ! echo "$type_subject" | grep -Eq "^\[($valid_types)\] .+"; then
+  echo "Error: Commit message 'type' must be one of [$valid_types] and follow the format '[type] subject'"
   exit 1
 fi
 
@@ -50,7 +50,7 @@ line_count=$(echo "$body" | wc -l)
 if [ "$line_count" -gt 1 ]; then
   echo "$body" | while read -r line; do
     if [ -n "$line" ] && ! echo "$line" | grep -q "^-\s"; then
-      echo "Error: Body lines must start with '-'."
+      echo "Error: Body lines must start with '-'"
       exit 1
     fi
   done
