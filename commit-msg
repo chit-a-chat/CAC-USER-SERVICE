@@ -2,8 +2,8 @@
 
 commit_msg_file=$1
 
-# 커밋 메시지에서 주석(#)을 제외한 모든 줄을 배열로 추출
-commit_lines=$(grep -v "^#" "$commit_msg_file")
+# 커밋 메시지에서 주석(#)을 제외하고 빈 줄 제거
+grep -v "^#" "$commit_msg_file" | sed '/^$/d' > "$commit_msg_file"
 
 # 첫 번째 줄은 type과 subject
 type_subject=$(echo "$commit_lines" | sed -n '1p')
@@ -25,12 +25,6 @@ else
   body=$body_and_footer
   footer=""
 fi
-
-# 커밋 메시지 확인을 위한 출력
-echo "Type and subject: '$type_subject'"
-echo "Empty line: '$empty_line'"
-echo "Body: '$body'"
-echo "Footer: '$footer'"
 
 # type 확인 ([type] 형식, 예: [feat], [fix], 등)
 valid_types="feat|fix|docs|style|refactor|test|chore|design|comment|init|rename|remove"
@@ -64,5 +58,6 @@ if [ -n "$footer" ]; then
   fi
 fi
 
+# 정상적인 커밋 메시지 형태
 echo "Commit message format is valid."
 exit 0
