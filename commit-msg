@@ -1,0 +1,69 @@
+#!/bin/sh
+
+commit_msg_file=$1
+
+# 커밋 메시지에서 주석(#)을 제외하기
+grep -v "^#" "$commit_msg_file" > "$commit_msg_file"
+
+commit_lines=$(cat "$commit_msg_file")
+
+# 첫 번째 줄은 type과 subject
+type_subject=$(echo "$commit_lines" | sed -n '1p')
+
+# 두 번째 줄은 반드시 빈 줄이어야 함
+empty_line=$(echo "$commit_lines" | sed -n '2p')
+
+# 세 번째 줄부터 본문과 꼬릿말 구분
+body_and_footer=$(echo "$commit_lines" | sed -n '3,$p')
+
+# 본문과 꼬릿말을 나누는 빈 줄의 위치 찾기
+footer_start=$(echo "$body_and_footer" | grep -n -m 1 '^$' | cut -d: -f1)
+
+# 본문과 꼬릿말 구분
+if [ -n "$footer_start" ]; then
+  body=$(echo "$body_and_footer" | sed -n "1,$((footer_start-1))p")
+  footer=$(echo "$body_and_footer" | sed -n "$((footer_start+1)),$ p")
+else
+  body=$body_and_footer
+  footer=""
+fi
+
+# type 확인 ([type] 형식, 예: [feat], [fix], 등)
+valid_types="feat|fix|docs|style|refactor|test|chore|design|comment|init|rename|remove"
+if ! echo "$type_subject" | grep -Eq "^\[($valid_types)\] .+"; then
+  echo "Error: Commit message 'type' must be one of [$valid_types] and follow the format '[type] subject'"
+  exit 1
+fi
+
+# 두 번째 줄은 반드시 빈 줄이어야 함
+if [ -n "$empty_line" ]; then
+  echo "Error: Second line must be empty."
+  exit 1
+fi
+
+# 본문이 여러 줄일 경우 각 줄은 '-'로 시작해야 함
+line_count=$(echo "$body" | wc -l)
+if [ "$line_count" -gt 1 ]; then
+  echo "$body" | while read -r line; do
+    if [ -n "$line" ] && ! echo "$line" | grep -q "^-\s"; then
+      echo "Error: Body lines must start with '-'"
+      exit 1
+    fi
+  done
+elif [ "$line_count" -eq 1 ] && echo "$body" | grep -q "^-"; then
+  # 본문이 한 줄일 때는 '-'가 없어야 함
+  echo "Error: Single-line body should not start with '-'"
+  exit 1
+fi
+
+# 푸터에 대한 규칙 검증 (필수 아님)
+if [ -n "$footer" ]; then
+  if ! echo "$footer" | grep -Eq "^(Fixes|Resolves|Ref|Related to): .+"; then
+    echo "Error: Footer must follow the format 'Fixes: #issue' or similar."
+    exit 1
+  fi
+fi
+
+# 정상적인 커밋 메시지 형태
+echo "Commit message format is valid."
+exit 0
