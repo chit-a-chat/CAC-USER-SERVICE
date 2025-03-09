@@ -2,8 +2,10 @@
 
 commit_msg_file=$1
 
-# 커밋 메시지에서 주석(#)을 제외하고 빈 줄 제거
-grep -v "^#" "$commit_msg_file" | sed '/^$/d' > "$commit_msg_file"
+# 커밋 메시지에서 주석(#)을 제외하기
+grep -v "^#" "$commit_msg_file" > "$commit_msg_file"
+
+commit_lines=$(cat "$commit_msg_file")
 
 # 첫 번째 줄은 type과 subject
 type_subject=$(echo "$commit_lines" | sed -n '1p')
@@ -48,6 +50,10 @@ if [ "$line_count" -gt 1 ]; then
       exit 1
     fi
   done
+elif [ "$line_count" -eq 1 ] && echo "$body" | grep -q "^-"; then
+  # 본문이 한 줄일 때는 '-'가 없어야 함
+  echo "Error: Single-line body should not start with '-'"
+  exit 1
 fi
 
 # 푸터에 대한 규칙 검증 (필수 아님)
