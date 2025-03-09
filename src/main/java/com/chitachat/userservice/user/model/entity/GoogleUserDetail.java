@@ -1,13 +1,14 @@
 package com.chitachat.userservice.user.model.entity;
 
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public class GoogleUserDetail implements OAuth2UserInfo {
 
   private final Map<String, Object> attributes;
 
+  public GoogleUserDetail(Map<String, Object> attributes) {
+    this.attributes = attributes;
+  }
 
   @Override
   public String getName() {

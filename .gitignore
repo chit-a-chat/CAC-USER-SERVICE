@@ -1,3 +1,4 @@
+.env
 HELP.md
 .gradle
 build/
@@ -14,7 +15,7 @@ build/
 .springBeans
 .sts4-cache
 bin/
-!**/src/main/**/bin/
+!**/src/main/**/bin/6
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###

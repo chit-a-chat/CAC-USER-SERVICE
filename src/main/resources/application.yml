@@ -15,8 +15,19 @@ spring:
             redirect-uri: http://localhost:8999/login/oauth2/code/google
             authorization-grant-type: authorization_code
             scope: profile,email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+
   config:
     import: optional:file:.env[.properties]
+
+jwt:
+  secret: ${JWT_SECURE_KEYS}
+  access-token-expiration: 3600000  # 액세스 토큰 만료 시간 (예: 1시간)
+  refresh-token-expiration: 86400000  # 리프레시 토큰 만료 시간 (예: 24시간)
 
 management:
   endpoints:
